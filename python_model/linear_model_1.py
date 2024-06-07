@@ -121,26 +121,5 @@ for temp_lamb in lambda_list:
     df_indice+=1
 
      
-Export_df.to_json("GP30_Results.json",orient="records")
-
-# Output results
-"""
-print("Le profit vaut %5.2f €" % model.objVal)
-
-print("\nSuivi des achats :")
-for i in range(I):
-    for j in range(J):
-        for t in range(T):
-            if x[i, j, t].x > 0.5:
-                print("Achat par le client %d, d'un pack de %d produits à la période %d" % (i+1, j+1, t+1))
-
-print("\nSuivi des propositions du commerçant :")
-for j in range(J):
-    for t in range(T):
-        if y[j, t].x > 0.5:
-            print("Le commerçant propose un pack de %d à la période %d, au prix de %5.2f €" % (j+1, t+1, p[j, t].x))
-
-print("\nSurplus de chaque client :")
-for i in range(I):
-    print("Le client %d gagne un surplus de %5.2f €" % (i+1, s[i].x))"""
+Export_df.to_json("GP30_Results.json",orient="records",lines=True)
 

@@ -71,6 +71,8 @@ printf {i in CONSUMERS}"   Le client %d gagne un surplus de %5.2f €.\n",i,s[i];
 #Brouillon
 printf{i in CONSUMERS, j in PRODUCTS, t in PERIODS : x[i,j,t] = 1}"k : %5.2f ; x : %5.2f \n",k[i,j,t],x[i,j,t];
 
+display p,r,l;
+
 # -----------------------------------------------------------------Apport des données-----------------------------------------------------------------
 data;
 
@@ -80,8 +82,8 @@ param J := 10;
 param T := 6;
 
 #Rates used to define reservation prices
-param b := 0.5;
-param beta := 0.04;
+param beta := 0.5;
+param b := 0.04;
 
 # Initial reservations prices
 param : ini :=

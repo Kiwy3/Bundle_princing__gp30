@@ -24,10 +24,11 @@ M = 10 * sum(c)  # Big M
 max_r = 12
 lamb = 0.5
 min_r = max_r*lamb
+rdm_seed = 654654
 
 #Controls variables
-loo=False
-expo = False
+loo=True
+expo = True
 
 """-----------Make a list with keys results----------"""
 def new_line_df(beta = beta, b = b, lamb = lamb):
@@ -46,7 +47,7 @@ def new_line_df(beta = beta, b = b, lamb = lamb):
     return [beta,b,lamb,S,A,model.ObjVal]
 
 """-----------optimize with initial results----------"""
-r = reservation_prices(I,J,T,beta,b,min_r,max_r)
+r = reservation_prices(I,J,T,beta,b,min_r,max_r,rdm_seed)
 model,variables = linear_model(I,J,T,M,c,r)
 
 """-----------Create Dataframe and save with initial results----------"""
@@ -65,14 +66,14 @@ if loo:
     df_indice = 1
     #Test multiple beta values
     for temp_beta in beta_list:
-        r = reservation_prices(I,J,T,temp_beta,b,min_r,max_r)
+        r = reservation_prices(I,J,T,temp_beta,b,min_r,max_r,rdm_seed)
         model,variables = linear_model(I,J,T,M,c,r)
         Export_df.loc[df_indice] = new_line_df(beta = temp_beta)
         df_indice+=1
 
     #Test multiple b values
     for temp_b in b_list:
-        r = reservation_prices(I,J,T,beta,temp_b,min_r,max_r)
+        r = reservation_prices(I,J,T,beta,temp_b,min_r,max_r,rdm_seed)
         model,variables = linear_model(I,J,T,M,c,r)
         Export_df.loc[df_indice] = new_line_df(b = temp_b)
         df_indice+=1
@@ -81,10 +82,10 @@ if loo:
     #Test multiple lambda values
     for temp_lamb in lambda_list:
         temp_min_r = temp_lamb*max_r
-        r = reservation_prices(I,J,T,beta,b,temp_min_r,max_r)
+        r = reservation_prices(I,J,T,beta,b,temp_min_r,max_r,rdm_seed)
         model,variables = linear_model(I,J,T,M,c,r)
         Export_df.loc[df_indice] = new_line_df(lamb=temp_lamb)
         df_indice+=1
 
 if expo:       
-    Export_df.to_json("GP30_Results.json",orient="records",lines=True)
+    Export_df.to_json("GP30_Results_anthony.json",orient="records",lines=True)

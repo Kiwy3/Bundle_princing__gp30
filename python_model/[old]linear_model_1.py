@@ -1,10 +1,12 @@
-from gurobipy import *
+from gurobipy import Model
+from gurobipy import GRB
+from gurobipy import quicksum
 import numpy as np
 np.set_printoptions(suppress=True)
 import pandas as pd
 
 
-# Parameters
+"""-----------Parameters----------"""
 I = 10  # number of consumers
 J = 10  # number of bundles
 T = 6   # number of periods
@@ -16,11 +18,8 @@ max_r = 12
 lamb = 0.5
 min_r = max_r*lamb
 
-
+"""-----------Reservation prices----------"""
 rng = np.random.default_rng(78794)
-
-
-# Compute reservation prices
 def reservation_prices(I,J,T,beta,b,min_r,max_r):
     r = np.full((I,J,T),0.)
     r[:,0,0] = rng.uniform(min_r,max_r,I)
@@ -32,7 +31,7 @@ def reservation_prices(I,J,T,beta,b,min_r,max_r):
     return r
 
 
-
+"""-----------Define and optimize the linear model----------"""
 def linear_model(I,J,T,M,c,r):
     model = Model("Linear_Problem_IP")
     # Variables
@@ -60,8 +59,8 @@ def linear_model(I,J,T,M,c,r):
     model.addConstrs((l[j, t] - M * y[j, t] <= 0 for j in range(J) for t in range(T)), name="Linearisation_Ljt_4")
     model.addConstrs((r[i][j][t] * x[i, j, t] - k[i, j, t] >= 0 for i in range(I) for j in range(J) for t in range(T)), name="Customer_choice")
     model.addConstrs((quicksum(x[i, j, t] for j in range(J) for t in range(T)) <= 1 for i in range(I)), name="Single_Purchase")
-    model.addConstrs((quicksum(y[j, t] for j in range(J)) == 1 for t in range(T)), name="Single_Bundle")
-    #model.addConstrs((quicksum(y[j, t] for j in range(J)) <= 1 for t in range(T)), name="Single_Bundle")
+    #model.addConstrs((quicksum(y[j, t] for j in range(J)) == 1 for t in range(T)), name="Single_Bundle")
+    model.addConstrs((quicksum(y[j, t] for j in range(J)) <= 1 for t in range(T)), name="Single_Bundle")
     model.addConstrs((x[i, j, t] <= y[j, t] for i in range(I) for j in range(J) for t in range(T)), name="Production_Limit")
 
     # Solve the model
@@ -69,17 +68,14 @@ def linear_model(I,J,T,M,c,r):
     if model.status == GRB.OPTIMAL: return model,model_vars
     else:print("No optimal solution found.")
 
-#optimize the model
+"""-----------Optimize with the initial parameters----------"""
 r = reservation_prices(I,J,T,beta,b,min_r,max_r)
 model,variables = linear_model(I,J,T,M,c,r)
 
-#create df for results
-columns = ["beta","b","Si","Results","Profit","lambda"]
-Export_df = pd.DataFrame(columns=columns)
-
+"""-----------Make a list with keys results----------"""
 def new_line_df(beta = beta, b = b, lamb = lamb):
     #Table like article table
-    A = np.full((T,4),0.)
+    A = np.full((T,5),0.)
     A[:,0]=[t+1 for t in range(T)]
     for j in range(J):
         for t in range(T):
@@ -87,21 +83,26 @@ def new_line_df(beta = beta, b = b, lamb = lamb):
                 A[t,1]=j+1
                 A[t,2]=variables["p"][j,t].x
                 A[t,3]=A[t,2]/A[t,1]
-
+                A[t,4] = sum([variables["x"][i,j,t].x for i in range (I)])
     S = [variables["s"][i].x for i in range(I)]
-    return [beta,b,S,A,model.ObjVal,lamb]
 
+    return [beta,b,lamb,S,A,model.ObjVal]
+
+"""-----------Create Dataframe and save with initial results----------"""
+columns = ["beta","b","lambda","Si","Results","Profit"]
+Export_df = pd.DataFrame(columns=columns)
 Export_df.loc[0] = new_line_df()
 print(Export_df["Profit"])
-loo=False
 
+"""-----------Optimize and save with sensibility analysis----------"""
+loo=True
 if loo:
-    beta_list = [0.2,0.5,0.8]
-    lambda_list = [0.2,0.5,0.8]
-    b_list = [0.01,0.04,0.07]
+    #Define list of values for sensibility analysis
+    beta_list = [0.2,0.8] #remove 0.5 since it's initial value
+    lambda_list = [0.2,0.8] #remove 0.5 since it's initial value
+    b_list = [0.01,0.07] #remove 0.04 since it's initial value
 
-    df_indice = 0
-
+    df_indice = 1
     #Test multiple beta values
     for temp_beta in beta_list:
         r = reservation_prices(I,J,T,temp_beta,b,min_r,max_r)
@@ -126,5 +127,5 @@ if loo:
         df_indice+=1
 
         
-    Export_df.to_json("GP30_Results.json",orient="records",lines=True)
+Export_df.to_json("GP30_Results.json",orient="records",lines=True)
 

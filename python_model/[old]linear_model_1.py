@@ -24,7 +24,7 @@ rng = np.random.default_rng(654654) #Anthony
 def reservation_prices(I,J,T,beta,b,min_r,max_r):
     r = np.full((I,J,T),0.)
     r[:,0,0] = rng.uniform(min_r,max_r,I) 
-    #r[:,0,0] = 8,7,9,10,11,10,9,11,8,12 
+    #r[:,0,0] = 12,10,11,5,7,7,6,6,5,7
     for i in range(I):
         for j in range(J):
             for t in range(T):
@@ -61,8 +61,8 @@ def linear_model(I,J,T,M,c,r):
     model.addConstrs((l[j, t] - M * y[j, t] <= 0 for j in range(J) for t in range(T)), name="Linearisation_Ljt_4")
     model.addConstrs((r[i][j][t] * x[i, j, t] - k[i, j, t] >= 0 for i in range(I) for j in range(J) for t in range(T)), name="Customer_choice")
     model.addConstrs((quicksum(x[i, j, t] for j in range(J) for t in range(T)) <= 1 for i in range(I)), name="Single_Purchase")
-    #model.addConstrs((quicksum(y[j, t] for j in range(J)) == 1 for t in range(T)), name="Single_Bundle")
-    model.addConstrs((quicksum(y[j, t] for j in range(J)) <= 1 for t in range(T)), name="Single_Bundle")
+    model.addConstrs((quicksum(y[j, t] for j in range(J)) == 1 for t in range(T)), name="Single_Bundle")
+    #model.addConstrs((quicksum(y[j, t] for j in range(J)) <= 1 for t in range(T)), name="Single_Bundle")
     model.addConstrs((x[i, j, t] <= y[j, t] for i in range(I) for j in range(J) for t in range(T)), name="Production_Limit")
 
     # Solve the model
@@ -129,5 +129,5 @@ if loo:
         df_indice+=1
 
         
-Export_df.to_json("GP30_Results_Anthony_21.json",orient="records",lines=True)
+Export_df.to_json("GP30_Results_Anthony_212.json",orient="records",lines=True)
 

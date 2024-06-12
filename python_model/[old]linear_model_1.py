@@ -19,10 +19,12 @@ lamb = 0.5
 min_r = max_r*lamb
 
 """-----------Reservation prices----------"""
-rng = np.random.default_rng(78794)
+#rng = np.random.default_rng(78794)
+rng = np.random.default_rng(654654) #Anthony
 def reservation_prices(I,J,T,beta,b,min_r,max_r):
     r = np.full((I,J,T),0.)
-    r[:,0,0] = rng.uniform(min_r,max_r,I)
+    r[:,0,0] = rng.uniform(min_r,max_r,I) 
+    #r[:,0,0] = 8,7,9,10,11,10,9,11,8,12 
     for i in range(I):
         for j in range(J):
             for t in range(T):
@@ -127,5 +129,5 @@ if loo:
         df_indice+=1
 
         
-Export_df.to_json("GP30_Results.json",orient="records",lines=True)
+Export_df.to_json("GP30_Results_Anthony_21.json",orient="records",lines=True)
 

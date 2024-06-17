@@ -28,10 +28,10 @@ min_r = max_r*lamb
 rdm_seed = 654654
 
 #Controls variables
-loo=True
-rand = False
-expo = True
-plot = False
+loo=True #loop for sensibility analysis 2.2
+rand = False #Distribution of initial parameters 2.1.2
+expo = True #Export pandas df into json file
+plot = False #if rand, plot histogram 2.1.2
 
 """-----------Make a list with keys results----------"""
 def new_line_df(beta = beta, b = b, min_r=min_r, max_r=max_r):
